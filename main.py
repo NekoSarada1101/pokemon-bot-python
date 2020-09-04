@@ -5,6 +5,10 @@ from setting_secret import *
 
 
 def do_post(e):
+    token = e.form.get('token')
+    if token != SLACK_TOKEN and token != IFTTT_TOKEN:
+        raise Exception("not allowed token:" + str(token))
+
     id = str(random.randint(1, 807))
 
     poke_json = json.loads(requests.get("https://pokeapi.co/api/v2/pokemon/" + id).text)
@@ -66,7 +70,7 @@ def do_post(e):
     }
     json_data = json.dumps(data).encode("utf-8")
     requests.post(POKEMON_URL, json_data)
-    return
+    return ""
 
 
 def get_colorcode(type):
