@@ -5,18 +5,18 @@ from setting_secret import *
 from google.cloud import firestore
 
 
-def do_post(e):
-    token = e.form.get('token')
+def do_post(e: requests) -> str:
+    token = e.form.get('token')  # type: str
     if token != SLACK_TOKEN and token != IFTTT_TOKEN:
         raise Exception("not allowed token:" + str(token))
 
-    id = str(random.randint(1, 808))
+    id = str(random.randint(1, 808))  # type: str
 
     db = firestore.Client.from_service_account_json('credentials.json')
-    doc = db.collection('pokemon').document(id).get().to_dict()
+    doc = db.collection('pokemon').document(id).get().to_dict()  # type: dict
     print(doc)
 
-    data = {
+    data = {  # type: dict
         "attachments": [
             {
                 "color": get_colorcode(doc['types'][0]),
@@ -60,13 +60,14 @@ def do_post(e):
             },
         ],
     }
-    json_data = json.dumps(data).encode("utf-8")
-    requests.post(POKEMON_URL, json_data)
+    json_data = json.dumps(data).encode("utf-8")  # type: json
+    response = requests.post(POKEMON_URL, json_data)  # type: response
+    print(response.text)
     return ""
 
 
-def get_colorcode(type):
-    color_code = {
+def get_colorcode(type: str) -> str:
+    color_code = {  # type: list
         'normal': '#979797',
         'fighting': '#B01E1F',
         'flying': '#7E80EC',
