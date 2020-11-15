@@ -2,6 +2,7 @@ import json
 import requests
 import random
 from setting_secret import *
+from google.cloud import firestore
 
 
 def do_post(e):
@@ -9,29 +10,20 @@ def do_post(e):
     if token != SLACK_TOKEN and token != IFTTT_TOKEN:
         raise Exception("not allowed token:" + str(token))
 
-    id = str(random.randint(1, 807))
+    id = str(random.randint(1, 808))
 
-    poke_json = json.loads(requests.get("https://pokeapi.co/api/v2/pokemon/" + id).text)
-    species_json = json.loads(requests.get(poke_json['species']['url']).text)
-
-    for index in range(len(species_json['names'])):
-        if species_json['names'][index]['language']['name'] == "ja":
-            ja_name = species_json['names'][index]['name']
-            break
-
-    for index in range(len(species_json['flavor_text_entries'])):
-        if species_json['flavor_text_entries'][index]['language']['name'] == "ja":
-            ja_flavor_text = species_json['flavor_text_entries'][index]['flavor_text']
-            break
+    db = firestore.Client.from_service_account_json('credentials.json')
+    doc = db.collection('pokemon').document(id).get().to_dict()
+    print(doc)
 
     data = {
         "attachments": [
             {
-                "color": get_colorcode(poke_json['types'][0]['type']['name']),
+                "color": get_colorcode(doc['types'][0]),
                 "blocks": [
                     {
                         "type": 'image',
-                        "image_url": poke_json['sprites']['front_default'],
+                        "image_url": doc['image'],
                         "alt_text": 'pokemon',
                     },
                     {
@@ -39,7 +31,7 @@ def do_post(e):
                         "elements": [
                             {
                                 "type": 'mrkdwn',
-                                "text": 'No.' + id + '\n*' + ja_name + '* _' + poke_json['name'] + '_',
+                                "text": 'No.' + str(doc['id']) + '\n*' + doc['ja_name'] + '* _' + doc['en_name'] + '_',
                             },
                         ],
                     },
@@ -47,7 +39,7 @@ def do_post(e):
                         "type": 'section',
                         "text": {
                             "type": 'mrkdwn',
-                            "text": ja_flavor_text,
+                            "text": doc['flavor_text'],
                         },
                     },
                     {
@@ -59,7 +51,7 @@ def do_post(e):
                                     "type": 'plain_text',
                                     "text": '詳しく見る',
                                 },
-                                "url": 'https://yakkun.com/swsh/zukan/n' + id,
+                                "url": doc['url'],
                                 "value": 'click_me_123',
                             },
                         ],
@@ -97,9 +89,5 @@ def get_colorcode(type):
     return color_code[type]
 
 
-def main():
-    do_post("e")
-
-
 if __name__ == "__main__":
-    main()
+    do_post()
