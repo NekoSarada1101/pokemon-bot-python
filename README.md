@@ -10,8 +10,17 @@
 * [PokeAPI](https://pokeapi.co/)
 
 ## 使用方法
+リポジトリをクローンする。
 ```
 git clone https://github.com/NekoSarada1101/random-pokemon-slack-bot.git
+```
+
+[slack_webhook_url.py](https://github.com/NekoSarada1101/random-pokemon-slack-bot/blob/main/slack_webhook_url.py
+) の`SLACK_WEBHOOK_URL
+`を自分のSlackのWebhook URLに書き換える。
+
+ディレクトリを移動し、実行する。
+```
 cd random-pokemon-slack-bot
 python main.py
 ```
