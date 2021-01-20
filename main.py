@@ -1,29 +1,55 @@
 import json
 import requests
 import random
-from setting_secret import *
-from google.cloud import firestore
+from slack_webhook_url import *
 
 
-def do_post(e: requests) -> str:
-    token = e.form.get('token')  # type: str
-    if token != SLACK_TOKEN and token != IFTTT_TOKEN:
-        raise Exception("not allowed token:" + str(token))
+def do_post():
+    pokemon_id = str(random.randint(1, 808))  # type: str
+    pokemon_response = requests.get("https://pokeapi.co/api/v2/pokemon/" + pokemon_id).json()  # type: json
 
-    id = str(random.randint(1, 808))  # type: str
+    image_url = pokemon_response["sprites"]["front_default"]
+    species_url = pokemon_response["species"]["url"]  # type: str
+    type_name = pokemon_response["types"][0]["type"]["name"]  # type: str
+    color_code = get_color_code(type_name)  # type: str
 
-    db = firestore.Client.from_service_account_json('credentials.json')
-    doc = db.collection('pokemon').document(id).get().to_dict()  # type: dict
-    print(doc)
+    print("image_url=" + image_url)
+    print("species_url=" + species_url)
+    print("type_name=" + type_name)
+    print("color_code=" + color_code)
+
+    species_response = requests.get(species_url).json()  # type: json
+
+    ja_name = ""  # type: str
+    for names in species_response["names"]:
+        if names["language"]["name"] == "ja":
+            ja_name = names["name"]
+            break
+
+    en_name = ""  # type: str
+    for names in species_response["names"]:
+        if names["language"]["name"] == "en":
+            en_name = names["name"]
+            break
+
+    flavor_text = ""  # type: str
+    for flavor_text_entry in species_response["flavor_text_entries"]:
+        if flavor_text_entry["language"]["name"] == "ja":
+            flavor_text = flavor_text_entry["flavor_text"]
+            break
+
+    print("ja_name=" + ja_name)
+    print("en_name=" + en_name)
+    print("flavor_text=" + flavor_text)
 
     data = {  # type: dict
         "attachments": [
             {
-                "color": get_colorcode(doc['types'][0]),
+                "color": color_code,
                 "blocks": [
                     {
                         "type": 'image',
-                        "image_url": doc['image'],
+                        "image_url": image_url,
                         "alt_text": 'pokemon',
                     },
                     {
@@ -31,7 +57,7 @@ def do_post(e: requests) -> str:
                         "elements": [
                             {
                                 "type": 'mrkdwn',
-                                "text": 'No.' + str(doc['id']) + '\n*' + doc['ja_name'] + '* _' + doc['en_name'] + '_',
+                                "text": 'No.' + pokemon_id + '\n*' + ja_name + '* _' + en_name + '_',
                             },
                         ],
                     },
@@ -39,7 +65,7 @@ def do_post(e: requests) -> str:
                         "type": 'section',
                         "text": {
                             "type": 'mrkdwn',
-                            "text": doc['flavor_text'],
+                            "text": flavor_text,
                         },
                     },
                     {
@@ -51,7 +77,7 @@ def do_post(e: requests) -> str:
                                     "type": 'plain_text',
                                     "text": '詳しく見る',
                                 },
-                                "url": doc['url'],
+                                "url": "https://yakkun.com/swsh/zukan/n" + pokemon_id,
                                 "value": 'click_me_123',
                             },
                         ],
@@ -61,13 +87,13 @@ def do_post(e: requests) -> str:
         ],
     }
     json_data = json.dumps(data).encode("utf-8")  # type: json
-    response = requests.post(POKEMON_URL, json_data)  # type: response
-    print(response.text)
+    response = requests.post(SLACK_WEBHOOK_URL, json_data)  # type: response
+    print(response)
     return ""
 
 
-def get_colorcode(type: str) -> str:
-    color_code = {  # type: list
+def get_color_code(type_name: str) -> str:
+    color_code = {  # type: dict
         'normal': '#979797',
         'fighting': '#B01E1F',
         'flying': '#7E80EC',
@@ -87,7 +113,7 @@ def get_colorcode(type: str) -> str:
         'dark': '#3F3834',
         'fairy': '#EA83D0'
     }
-    return color_code[type]
+    return color_code[type_name]
 
 
 if __name__ == "__main__":
