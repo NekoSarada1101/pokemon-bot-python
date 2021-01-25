@@ -20,3 +20,6 @@ git clone https://github.com/NekoSarada1101/random-pokemon-slack-bot.git
 cd random-pokemon-slack-bot
 python main.py
 ```
+
+## ライセンス
+[MIT](https://github.com/NekoSarada1101/random-pokemon-slack-bot/blob/main/LICENSE)
