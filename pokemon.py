@@ -89,6 +89,7 @@ def do_post():
     json_data = json.dumps(data).encode("utf-8")  # type: json
     response = requests.post(SLACK_WEBHOOK_URL, json_data)  # type: response
     print(response)
+    return response
 
 
 def get_color_code(type_name: str) -> str:
