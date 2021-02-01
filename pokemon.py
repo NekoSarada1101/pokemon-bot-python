@@ -1,7 +1,7 @@
 import json
 import requests
 import random
-from slack_webhook_url import *
+from settings import *
 
 
 def do_post():
