@@ -1,7 +1,6 @@
 # random-pokemon-slack-bot
 
-<img width=300px src="https://user-images.githubusercontent.com/46714670/105172645-44da9e00-5b63-11eb-8211-c7067311538d.png">
-<img width=300px src="https://user-images.githubusercontent.com/46714670/105174038-49a05180-5b65-11eb-8281-c4dae8242259.png">
+<img width=300px src="https://user-images.githubusercontent.com/46714670/105172645-44da9e00-5b63-11eb-8211-c7067311538d.png"> <img width=300px src="https://user-images.githubusercontent.com/46714670/105174038-49a05180-5b65-11eb-8281-c4dae8242259.png">
 
 ### 概要
 
